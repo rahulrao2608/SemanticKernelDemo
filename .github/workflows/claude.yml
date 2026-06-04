@@ -33,3 +33,39 @@ jobs:
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          mcp_config: |
+            {
+              "mcpServers": {
+                "github": {
+                  "command": "docker",
+                  "args": [
+                    "run", "--rm", "-i",
+                    "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
+                    "ghcr.io/github/github-mcp-server"
+                  ],
+                  "env": {
+                    "GITHUB_PERSONAL_ACCESS_TOKEN": "${{ secrets.GITHUB_TOKEN }}"
+                  }
+                },
+                "filesystem": {
+                  "command": "npx",
+                  "args": [
+                    "-y", "@modelcontextprotocol/server-filesystem",
+                    "${{ github.workspace }}"
+                  ]
+                },
+                "brave-search": {
+                  "command": "npx",
+                  "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+                  "env": {
+                    "BRAVE_API_KEY": "${{ secrets.BRAVE_API_KEY }}"
+                  }
+                }
+              }
+            }
+          # To add a custom MCP server, extend the mcpServers block above:
+          #   "my-custom-server": {
+          #     "command": "npx",
+          #     "args": ["-y", "my-mcp-server-package"],
+          #     "env": { "MY_API_KEY": "${{ secrets.MY_API_KEY }}" }
+          #   }
